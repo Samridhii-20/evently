@@ -239,7 +239,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
       <Card className="max-w-4xl mx-auto overflow-hidden">
         <div className="relative w-full h-[400px] overflow-hidden">
           <Image
-            src={event.eventImage ? `${process.env.NEXT_PUBLIC_BACKEND_URI}/${event.eventImage}` : '/placeholder-event.svg'}
+            src={event.eventImage ? `${process.env.NEXT_PUBLIC_BACKEND_URI}${event.eventImage}` : '/placeholder-event.svg'}
             alt={event.title}
             fill
             className="object-cover"

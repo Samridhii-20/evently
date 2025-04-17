@@ -128,7 +128,7 @@ export default function EventsPage() {
               title={event.title}
               description={event.description}
               date={event.date}
-              image={event.eventImage ? `${process.env.NEXT_PUBLIC_BACKEND_URI}/${event.eventImage}` : '/placeholder-event.svg'}
+              image={event.eventImage ? `${process.env.NEXT_PUBLIC_BACKEND_URI}${event.eventImage}` : '/placeholder-event.svg'}
               location={event.location}
               category={event.category || 'General'}
             />
