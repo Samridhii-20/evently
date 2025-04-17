@@ -4,6 +4,7 @@ console.log("Loaded MONGO_URI:", process.env.MONGO_URI); // Debugging line
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const path = require("path");
 const AuthRouter = require("./routes/auth");
 const EventsRouter = require("./routes/events");
 
@@ -20,6 +21,7 @@ if (!MONGO_URI) {
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(AuthRouter);
 app.use('/events', EventsRouter);
 

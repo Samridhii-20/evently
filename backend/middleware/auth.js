@@ -5,7 +5,11 @@ const User = require('../models/User');
 exports.auth = async (req, res, next) => {
     try {
         // Get token from header
-        const token = req.header('authorization').replace('Bearer ', '');
+        const authHeader = req.header('authorization');
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({ msg: 'Invalid authorization header format' });
+        }
+        const token = authHeader.replace('Bearer ', '');
 
         // Check if no token
         if (!token) {
