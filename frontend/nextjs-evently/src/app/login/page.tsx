@@ -26,7 +26,13 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
+      let data;
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        throw new Error('Server returned non-JSON response. Please try again later.');
+      }
 
       if (data.token) {
         localStorage.setItem('token', data.token);

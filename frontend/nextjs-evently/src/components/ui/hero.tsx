@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import CreateEventModal from '@/components/events/CreateEventModal';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
@@ -45,19 +46,19 @@ export default function Hero() {
                 </Button>
               </Link>
               
-              {isLoggedIn && isOrganizer ? (
-                <Link href="/events/create">
-                  <Button variant="outline" size="lg" className="h-12 px-6 text-base">
-                    Create Event
-                  </Button>
-                </Link>
-              ) : !isLoggedIn ? (
+              {isOrganizer && (
+                <div className="mt-0">
+                  <CreateEventModal />
+                </div>
+              )}
+              
+              {!isLoggedIn && (
                 <Link href="/register">
                   <Button variant="outline" size="lg" className="h-12 px-6 text-base">
-                    Sign Up
+                    Get Started
                   </Button>
                 </Link>
-              ) : null}
+              )}
             </div>
             
             <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">

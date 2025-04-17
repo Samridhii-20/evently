@@ -207,21 +207,32 @@ export default function CalendarPage() {
           background: #2563eb;
         }
         .react-calendar__tile--now {
-          background: #f3f4f6;
+          background: #e2e8f0;
+          border-radius: 0.5rem;
+          font-weight: 600;
+          border: 2px solid #3b82f6;
         }
         .react-calendar__tile:enabled:hover,
         .react-calendar__tile:enabled:focus {
-          background-color: #e5e7eb;
+          background-color: #dbeafe;
+          border-radius: 0.5rem;
+          transform: scale(1.05);
         }
         .react-calendar__navigation button:enabled:hover,
         .react-calendar__navigation button:enabled:focus {
-          background-color: #e5e7eb;
+          background-color: #dbeafe;
+          transform: scale(1.1);
+        }
+        .react-calendar__navigation button {
+          font-weight: bold;
         }
         .react-calendar__month-view__days__day--weekend {
-          color: inherit;
+          color: #f43f5e;
+          font-weight: 500;
         }
         .react-calendar__month-view__days__day--neighboringMonth {
-          color: #9ca3af;
+          color: #94a3b8;
+          opacity: 0.7;
         }
       `}</style>
     </div>

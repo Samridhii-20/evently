@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,10 +12,14 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 export default function CreateEventModal() {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
+  const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [location, setLocation] = useState('');
+  const [registrationLink, setRegistrationLink] = useState('');
+  const [eventImage, setEventImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [isOrganizer, setIsOrganizer] = useState(false);
   const router = useRouter();
@@ -45,6 +50,27 @@ export default function CreateEventModal() {
     // Combine date and time
     const eventDateTime = new Date(`${date}T${time}`);
 
+    // Validate category
+    if (!category) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Please select an event category',
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    // Create FormData for multipart/form-data request
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('category', category);
+    formData.append('description', description);
+    formData.append('date', eventDateTime.toISOString());
+    formData.append('location', location);
+    if (registrationLink) formData.append('registrationLink', registrationLink);
+    if (eventImage) formData.append('eventImage', eventImage);
+
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -62,15 +88,9 @@ export default function CreateEventModal() {
       const response = await fetch('http://localhost:5001/events/create', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          title,
-          description,
-          date: eventDateTime.toISOString(),
-          location,
-        }),
+        body: formData,
       });
 
       const data = await response.json();
@@ -105,10 +125,42 @@ export default function CreateEventModal() {
 
   const resetForm = () => {
     setTitle('');
+    setCategory('');
     setDescription('');
     setDate('');
     setTime('');
     setLocation('');
+    setRegistrationLink('');
+    setEventImage(null);
+    setImagePreview('');
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Image size should be less than 5MB',
+        });
+        return;
+      }
+      if (!file.type.startsWith('image/')) {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Please upload an image file',
+        });
+        return;
+      }
+      setEventImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   return (
@@ -123,7 +175,7 @@ export default function CreateEventModal() {
           Create Event
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create New Event</DialogTitle>
           <DialogDescription>
@@ -142,13 +194,31 @@ export default function CreateEventModal() {
             />
           </div>
           <div className="space-y-2">
+            <Label htmlFor="category">Event Category</Label>
+            <select
+              id="category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              required
+            >
+              <option value="">Select a category</option>
+              <option value="Academic">Academic</option>
+              <option value="Tech and Innovation">Tech and Innovation</option>
+              <option value="Cultural & Entertainment">Cultural & Entertainment</option>
+              <option value="Festival">Festival</option>
+              <option value="Sports">Sports</option>
+            </select>
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
-            <Input
+            <textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Enter event description"
               required
+              className="min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -182,6 +252,35 @@ export default function CreateEventModal() {
               placeholder="Enter event location"
               required
             />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="registrationLink">Registration Link</Label>
+            <Input
+              id="registrationLink"
+              value={registrationLink}
+              onChange={(e) => setRegistrationLink(e.target.value)}
+              placeholder="Enter registration link (if any)"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="eventImage">Event Image</Label>
+            <Input
+              id="eventImage"
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="cursor-pointer"
+            />
+            {imagePreview && (
+              <div className="mt-2 relative w-full h-48 overflow-hidden rounded-md">
+                <Image
+                  src={imagePreview}
+                  alt="Event preview"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>

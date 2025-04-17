@@ -59,10 +59,16 @@ export default function Footer() {
             <h4 className="text-base font-semibold">Contact</h4>
             <ul className="space-y-2 text-sm">
               <li className="text-slate-500 dark:text-slate-400">
-                Email: support@evently.com
+                Email: E23CSEU0558@bennett.edu.in
               </li>
               <li className="text-slate-500 dark:text-slate-400">
-                Phone: +1 (555) 123-4567
+                Email: E23CSEU0561@bennett.edu.in
+              </li>
+              <li className="text-slate-500 dark:text-slate-400">
+                Phone:+91 9101472921
+              </li>
+              <li className="text-slate-500 dark:text-slate-400">
+                Phone:+91 9365962436
               </li>
             </ul>
             <div className="flex space-x-4 pt-2">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -9,9 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
 
-export default function RegisterPage() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+export default function ResetPasswordPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -20,17 +18,6 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
-    // Validate email domain
-    if (!email.endsWith('@bennett.edu.in')) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Please use your Bennett University email address (@bennett.edu.in)',
-      });
-      setIsLoading(false);
-      return;
-    }
 
     // Validate password requirements
     const passwordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/;
@@ -44,7 +31,6 @@ export default function RegisterPage() {
       return;
     }
 
-    // Validate passwords match
     if (password !== confirmPassword) {
       toast({
         variant: 'destructive',
@@ -56,38 +42,44 @@ export default function RegisterPage() {
     }
 
     try {
-      const response = await fetch('http://localhost:5001/auth/register', {
+      const email = localStorage.getItem('resetEmail');
+      if (!email) {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Email not found. Please start the reset process again',
+        });
+        router.push('/forgot-password');
+        return;
+      }
+
+      const response = await fetch('http://localhost:5001/auth/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ email, password }),
       });
 
-      let data;
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        data = await response.json();
-      } else {
-        throw new Error('Server returned non-JSON response. Please try again later.');
-      }
+      const data = await response.json();
 
       if (response.ok) {
         toast({
           title: 'Success',
-          description: data.msg || 'Registration successful!',
+          description: 'Password has been reset successfully',
         });
+        localStorage.removeItem('resetEmail');
         router.push('/login');
       } else {
         toast({
           variant: 'destructive',
           title: 'Error',
-          description: data.msg || 'Registration failed',
+          description: data.msg || 'Failed to reset password',
         });
       }
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'An error occurred during registration',
+        description: 'An error occurred while resetting password',
       });
     } finally {
       setIsLoading(false);
@@ -95,47 +87,18 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-[calc(100vh-8rem)] bg-slate-50 px-4 py-12 dark:bg-slate-900">
+    <div className="flex justify-center items-center min-h-screen bg-slate-50 px-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="space-y-2">
-          <CardTitle className="text-3xl font-bold text-center">Create an Account</CardTitle>
+          <CardTitle className="text-3xl font-bold text-center">Reset Password</CardTitle>
           <CardDescription className="text-center text-slate-500">
-            Sign up to start discovering and organizing events
+            Enter your new password
           </CardDescription>
-          <div className="text-center text-xs text-slate-400">
-            Use your Bennett University email (@bennett.edu.in)
-            <br />
-            Password must be 8+ characters with numbers and special characters
-          </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input
-                id="name"
-                type="text"
-                placeholder="John Doe"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                className="h-12"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@bennett.edu.in"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="h-12"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">New Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -159,14 +122,14 @@ export default function RegisterPage() {
               />
             </div>
             <Button type="submit" className="w-full h-12 text-base" disabled={isLoading}>
-              {isLoading ? 'Creating Account...' : 'Create Account'}
+              {isLoading ? 'Resetting...' : 'Reset Password'}
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex justify-center">
-          <p className="text-sm text-slate-500">
-            Already have an account?{' '}
-            <Link href="/login" className="text-blue-600 hover:underline">
+        <CardFooter className="flex justify-center border-t p-6">
+          <p className="text-center text-sm text-slate-600">
+            Remember your password?{' '}
+            <Link href="/login" className="font-medium text-blue-600 hover:underline">
               Sign in
             </Link>
           </p>

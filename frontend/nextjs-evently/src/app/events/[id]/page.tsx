@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
+import Link from 'next/link';
+import Image from 'next/image';
 
 type Event = {
   _id: string;
@@ -12,10 +14,16 @@ type Event = {
   description: string;
   date: string;
   location: string;
+  registrationLink?: string;
+  eventImage?: string;
   organizer: {
     id: string;
     name: string;
   };
+  attendees: Array<{
+    id: string;
+    name: string;
+  }>;
 };
 
 export default function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -49,10 +57,17 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
         const data = await response.json();
         
         if (response.ok) {
-          setEvent(data);
+          // Ensure data has required properties
+
+          const eventData = {
+            ...data,
+            eventImage: data.image,
+            organizer: data.organizer || { id: '', name: 'Unknown' }
+          };
+          setEvent(eventData);
           // Check if user is already attending
           if (userId) {
-            setIsAttending(data.attendees.some((attendee: any) => attendee.id === userId));
+            setIsAttending(eventData.attendees.some((attendee: any) => attendee.id === userId));
           }
         } else {
           toast({
@@ -97,6 +112,22 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
       return;
     }
 
+    // If there's a registration link, open it in a new tab
+    if (event?.registrationLink) {
+      try {
+        const url = new URL(event.registrationLink);
+        window.open(url.toString(), '_blank', 'noopener,noreferrer');
+        return;
+      } catch (error) {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Invalid registration link provided',
+        });
+        return;
+      }
+    }
+
     setIsRegistering(true);
 
     try {
@@ -122,6 +153,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
           const user = JSON.parse(localStorage.getItem('user') || '{}');
           setEvent({
             ...event,
+            attendees: [...(event.attendees || []), { id: user.id, name: user.name }]
           });
         }
       } else {
@@ -167,6 +199,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
         if (event) {
           setEvent({
             ...event,
+            attendees: event.attendees.filter(attendee => attendee.id !== userId)
           });
         }
       } else {
@@ -187,33 +220,40 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-12">
-        <div className="flex justify-center items-center min-h-[400px]">
-          <div className="animate-pulse text-xl">Loading event details...</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!event) {
-    return (
-      <div className="container mx-auto px-4 py-12">
-        <div className="text-center py-12">
-          <h3 className="text-2xl font-medium mb-4">Event not found</h3>
-          <p className="text-slate-500 dark:text-slate-400 mb-6">
-            The event you're looking for doesn't exist or has been removed.
-          </p>
-          <Button onClick={() => router.push('/events')}>View All Events</Button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
+  return isLoading ? (
+    <div className="flex justify-center items-center min-h-[400px]">
+      <div className="animate-pulse text-xl">Loading event details...</div>
+    </div>
+  ) : !event ? (
+    <div className="text-center py-12">
+      <h3 className="text-2xl font-medium mb-4">Event not found</h3>
+      <p className="text-slate-500 dark:text-slate-400 mb-6">
+        The event you're looking for doesn't exist or has been removed.
+      </p>
+      <Link href="/events">
+        <Button variant="outline">Back to Events</Button>
+      </Link>
+    </div>
+  ) : (
     <div className="container mx-auto px-4 py-12">
-      <Card className="max-w-4xl mx-auto">
+      <Card className="max-w-4xl mx-auto overflow-hidden">
+        <div className="relative w-full h-[400px] overflow-hidden">
+          <Image
+            src={event.eventImage ? (event.eventImage.startsWith('http') ? event.eventImage : `http://localhost:5001${event.eventImage.startsWith('/') ? event.eventImage : `/${event.eventImage}`}`) : '/placeholder-event.svg'}
+            alt={event.title}
+            fill
+            className="object-cover"
+            priority
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            quality={75}
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = '/placeholder-event.svg';
+              target.style.objectFit = 'contain';
+              target.style.backgroundColor = '#f3f4f6';
+            }}
+          />
+        </div>
         <CardHeader className="space-y-4">
           <CardTitle className="text-3xl">{event.title}</CardTitle>
           <CardDescription>
@@ -235,7 +275,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
-                <span className="text-base">Organized by {event.organizer.name}</span>
+                <span className="text-base">Organized by {event.organizer?.name || 'Unknown'}</span>
               </div>
             </div>
           </CardDescription>
@@ -243,11 +283,10 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
         <CardContent>
           <div className="prose dark:prose-invert max-w-none">
             <h3 className="text-xl font-semibold mb-4">About this event</h3>
-            <p className="whitespace-pre-line text-slate-700 dark:text-slate-300">
+            <p className="whitespace-pre-line text-slate-700 dark:text-slate-300 mb-6">
               {event.description}
             </p>
           </div>
-
         </CardContent>
         <CardFooter className="flex justify-end space-x-4">
           <Button variant="outline" onClick={() => router.push('/events')}>Back to Events</Button>
