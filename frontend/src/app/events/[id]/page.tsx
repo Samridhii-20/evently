@@ -239,20 +239,10 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
     <div className="container mx-auto px-4 py-12">
       <Card className="max-w-4xl mx-auto overflow-hidden">
         <div className="relative w-full h-[400px] overflow-hidden">
-          <Image
+          <img
             src={event.eventImage ? `${process.env.NEXT_PUBLIC_BACKEND_URI}${event.eventImage}` : '/placeholder-event.svg'}
             alt={event.title}
-            fill
             className="object-cover"
-            priority
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            quality={75}
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = '/placeholder-event.svg';
-              target.style.objectFit = 'contain';
-              target.style.backgroundColor = '#f3f4f6';
-            }}
           />
         </div>
         <CardHeader className="space-y-4">
