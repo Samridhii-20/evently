@@ -21,7 +21,7 @@ router.post("/create", auth, isOrganizer, upload, async (req, res) => {
             return res.status(400).json({ msg: req.fileValidationError });
         }
 
-        const imagePath = req.files && req.files.eventImage && req.files.eventImage[0] ? `http://localhost:${process.env.PORT || 5001}/uploads/${req.files.eventImage[0].filename}` : null;
+        const imagePath = req.files && req.files.eventImage && req.files.eventImage[0] ? `/uploads/${req.files.eventImage[0].filename}` : null;
 
         const event = new Event({ 
             title, 
@@ -123,7 +123,7 @@ router.put("/:id", auth, isOrganizer, upload, async (req, res) => {
                     fs.unlinkSync(oldImagePath);
                 }
             }
-            imagePath = `http://localhost:${process.env.PORT || 5001}/uploads/${req.files.eventImage[0].filename}`;
+            imagePath = `/uploads/${req.files.eventImage[0].filename}`;
         }
 
         const updatedEvent = await Event.findByIdAndUpdate(
