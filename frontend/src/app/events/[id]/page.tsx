@@ -66,7 +66,8 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
           };
           setEvent(eventData);
           // Check if user is already attending
-          if (userId) {
+
+          if (userId && eventData.attendees) {
             setIsAttending(eventData.attendees.some((attendee: any) => attendee.id === userId));
           }
         } else {
