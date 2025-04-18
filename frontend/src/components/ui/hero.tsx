@@ -41,7 +41,7 @@ export default function Hero() {
             
             <div className="flex flex-wrap gap-4">
               <Link href="/events">
-                <Button size="lg" className="h-12 px-6 text-base">
+                 <Button size="lg" className="h-12 px-8 text-base bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white border-0 shadow-lg shadow-orange-500/25">
                   Explore Events
                 </Button>
               </Link>
