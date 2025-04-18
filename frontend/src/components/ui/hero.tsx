@@ -31,8 +31,8 @@ export default function Hero() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8">
             <div className="space-y-4">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
-                Discover & Create <span className="text-blue-600 dark:text-blue-400">Memorable</span> Events
+              <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 dark:from-white dark:via-slate-200 dark:to-white">
+                Discover and Create <span className="text-orange-600 dark:text-orange-400">Memorable</span> Events
               </h1>
               <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-2xl">
                 Find the perfect events that match your interests or create your own to connect with like-minded people.
