@@ -70,18 +70,14 @@ export default function Hero() {
           </div>
           
           <div className="relative hidden lg:block">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg blur opacity-30"></div>
-            <div className="relative bg-white dark:bg-slate-800 rounded-lg shadow-xl overflow-hidden">
-              <div className="p-8 space-y-6">
-                <div className="h-40 bg-slate-100 dark:bg-slate-700 rounded-md animate-pulse"></div>
-                <div className="space-y-3">
-                  <div className="h-6 bg-slate-100 dark:bg-slate-700 rounded w-3/4 animate-pulse"></div>
-                  <div className="h-4 bg-slate-100 dark:bg-slate-700 rounded animate-pulse"></div>
-                  <div className="h-4 bg-slate-100 dark:bg-slate-700 rounded animate-pulse"></div>
-                  <div className="h-4 bg-slate-100 dark:bg-slate-700 rounded w-4/5 animate-pulse"></div>
-                </div>
-                <div className="h-10 bg-blue-100 dark:bg-blue-900/30 rounded-md w-1/2 animate-pulse"></div>
-              </div>
+            <div className="absolute -inset-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-[2rem] blur-2xl opacity-20 animate-pulse"></div>
+            <div className="relative bg-white dark:bg-slate-800 rounded-[2rem] shadow-2xl shadow-orange-500/10 overflow-hidden border border-slate-100 dark:border-slate-700">
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent"></div>
+              <img
+                src="/festival-hero.svg"
+                alt="Festival Hero"
+                className="w-full h-[600px] object-cover object-center rounded-[2rem] transform hover:scale-105 transition-transform duration-500"
+              />
             </div>
           </div>
         </div>
