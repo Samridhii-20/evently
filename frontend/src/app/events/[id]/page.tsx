@@ -248,7 +248,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
         </div>
         <CardHeader className="space-y-4">
           <CardTitle className="text-3xl">{event.title}</CardTitle>
-          <CardDescription>
+          <div className="text-sm text-slate-500 dark:text-slate-400">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div className="flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -278,7 +278,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
                 </div>
               )}
             </div>
-          </CardDescription>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="prose dark:prose-invert max-w-none">
