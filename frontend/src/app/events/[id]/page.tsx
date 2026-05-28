@@ -290,7 +290,11 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
         </CardContent>
         <CardFooter className="flex justify-end space-x-4">
           <Button variant="outline" onClick={() => router.push('/events')}>Back to Events</Button>
-          {isLoggedIn && (
+          {!isLoggedIn ? (
+            <Button onClick={handleRegister} disabled={isRegistering}>
+              Register for Event
+            </Button>
+          ) : (
             isAttending ? (
               <Button variant="destructive" onClick={handleCancelRegistration} disabled={isRegistering}>
                 {isRegistering ? 'Cancelling...' : 'Cancel Registration'}
