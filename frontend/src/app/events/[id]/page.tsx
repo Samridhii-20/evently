@@ -107,10 +107,10 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
   const handleRegister = async () => {
     if (!isLoggedIn) {
       toast({
-        title: 'Authentication Required',
-        description: 'Please log in to register for this event',
+        title: 'Registration Required',
+        description: 'Please sign up for an account to register for this event',
       });
-      router.push('/login');
+      router.push('/register');
       return;
     }
 
