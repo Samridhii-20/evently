@@ -67,7 +67,7 @@ export default function Hero() {
               )}
               
               {!isLoggedIn && (
-                <Link href="/events">
+                <Link href="/register">
                   <Button variant="outline" size="lg" className="h-12 px-6 text-base font-semibold rounded-lg">
                     Get Started
                   </Button>

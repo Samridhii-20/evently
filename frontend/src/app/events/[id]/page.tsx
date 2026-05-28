@@ -105,14 +105,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
   };
 
   const handleRegister = async () => {
-    if (!isLoggedIn) {
-      toast({
-        title: 'Registration Required',
-        description: 'Please sign up for an account to register for this event',
-      });
-      router.push('/register');
-      return;
-    }
+    if (!isLoggedIn) return;
 
     // If there's a registration link, open it in a new tab
     if (event?.registrationLink) {
@@ -290,11 +283,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
         </CardContent>
         <CardFooter className="flex justify-end space-x-4">
           <Button variant="outline" onClick={() => router.push('/events')}>Back to Events</Button>
-          {!isLoggedIn ? (
-            <Button onClick={handleRegister} disabled={isRegistering}>
-              Register for Event
-            </Button>
-          ) : (
+          {isLoggedIn && (
             isAttending ? (
               <Button variant="destructive" onClick={handleCancelRegistration} disabled={isRegistering}>
                 {isRegistering ? 'Cancelling...' : 'Cancel Registration'}
