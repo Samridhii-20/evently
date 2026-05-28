@@ -37,6 +37,7 @@ export default function LoginPage() {
       if (data.token) {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
+        window.dispatchEvent(new Event('auth-change'));
         toast({
           title: 'Success',
           description: 'Login successful!',

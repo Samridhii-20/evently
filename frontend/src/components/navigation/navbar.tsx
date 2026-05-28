@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import CreateEventModal from '@/components/events/CreateEventModal';
+
 
 type NavLink = {
   label: string;
@@ -19,12 +19,11 @@ const navLinks: NavLink[] = [
 
 export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isOrganizer, setIsOrganizer] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
-  useEffect(() => {
-    // Check if user is logged in
+  const updateAuthState = () => {
     const token = localStorage.getItem('token');
     const user = localStorage.getItem('user');
     
@@ -32,20 +31,35 @@ export default function Navbar() {
       setIsLoggedIn(true);
       try {
         const userData = JSON.parse(user);
-        setIsOrganizer(userData.role === 'organizer');
+        setRole(userData.role);
       } catch (error) {
         console.error('Error parsing user data:', error);
+        setRole(null);
       }
+    } else {
+      setIsLoggedIn(false);
+      setRole(null);
     }
+  };
+
+  useEffect(() => {
+    updateAuthState();
+    
+    window.addEventListener('auth-change', updateAuthState);
+    return () => {
+      window.removeEventListener('auth-change', updateAuthState);
+    };
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    setIsLoggedIn(false);
-    setIsOrganizer(false);
+    updateAuthState();
+    window.dispatchEvent(new Event('auth-change'));
     window.location.href = '/';
   };
+
+  const isApprovedOrganizer = role === 'organizer' || role === 'admin';
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-gradient-to-r from-blue-600/90 to-indigo-600/90 backdrop-blur-sm dark:border-slate-800">
@@ -69,7 +83,16 @@ export default function Navbar() {
                 </Link>
               </li>
             ))}
-
+            {role === 'admin' && (
+              <li>
+                <Link 
+                  href="/admin"
+                  className={`text-base font-medium transition-colors hover:text-white/90 ${pathname === '/admin' ? 'text-white' : 'text-white/80'}`}
+                >
+                  Admin
+                </Link>
+              </li>
+            )}
           </ul>
           <div className="flex items-center space-x-4">
             {isLoggedIn ? (
@@ -89,7 +112,7 @@ export default function Navbar() {
 
         {/* Mobile Menu Button */}
         <button 
-          className="md:hidden" 
+          className="md:hidden text-white" 
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           aria-label="Toggle menu"
         >
@@ -111,27 +134,31 @@ export default function Navbar() {
 
       {/* Mobile Navigation */}
       {isMobileMenuOpen && (
-        <div className="md:hidden">
+        <div className="md:hidden bg-gradient-to-b from-indigo-600 to-indigo-700 border-t border-white/10">
           <div className="space-y-1 px-4 pb-5 pt-2">
             {navLinks.map((link) => (
               <Link 
                 key={link.href} 
                 href={link.href}
-                className={`block py-2 text-base ${pathname === link.href ? 'font-medium text-slate-900 dark:text-slate-50' : 'text-slate-500 dark:text-slate-400'}`}
+                className={`block py-2 text-base font-medium transition-colors ${pathname === link.href ? 'text-white' : 'text-white/80'}`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {link.label}
               </Link>
             ))}
-            {isOrganizer && (
-              <div onClick={() => setIsMobileMenuOpen(false)}>
-                <CreateEventModal />
-              </div>
+            {role === 'admin' && (
+              <Link 
+                href="/admin"
+                className={`block py-2 text-base font-medium transition-colors ${pathname === '/admin' ? 'text-white' : 'text-white/80'}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Admin
+              </Link>
             )}
             <div className="mt-4 flex flex-col space-y-2">
               {isLoggedIn ? (
                 <>
-                  <Button variant="outline" className="w-full justify-start" onClick={handleLogout}>Logout</Button>
+                  <Button variant="outline" className="w-full justify-start text-white border-white/20 bg-white/10 hover:bg-white/20" onClick={handleLogout}>Logout</Button>
                 </>
               ) : (
                 <>
@@ -139,13 +166,13 @@ export default function Navbar() {
                     href="/login"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <Button variant="ghost" className="w-full justify-start">Login</Button>
+                    <Button variant="ghost" className="w-full justify-start text-white hover:bg-white/10">Login</Button>
                   </Link>
                   <Link 
                     href="/register"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <Button variant="default" className="w-full justify-start">Sign Up</Button>
+                    <Button variant="secondary" className="w-full justify-start text-white bg-white/10 hover:bg-white/20 border-white/20">Sign Up</Button>
                   </Link>
                 </>
               )}

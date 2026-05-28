@@ -7,6 +7,7 @@ const cors = require("cors");
 const path = require("path");
 const AuthRouter = require("./routes/auth");
 const EventsRouter = require("./routes/events");
+const AdminRouter = require("./routes/admin");
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -24,6 +25,7 @@ app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(AuthRouter);
 app.use('/events', EventsRouter);
+app.use('/admin', AdminRouter);
 
 // Connect to MongoDB
 mongoose.connect(MONGO_URI, {

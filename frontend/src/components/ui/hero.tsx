@@ -9,8 +9,7 @@ export default function Hero() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isOrganizer, setIsOrganizer] = useState(false);
 
-  useEffect(() => {
-    // Check if user is logged in
+  const updateHeroState = () => {
     const token = localStorage.getItem('token');
     const user = localStorage.getItem('user');
     
@@ -18,11 +17,24 @@ export default function Hero() {
       setIsLoggedIn(true);
       try {
         const userData = JSON.parse(user);
-        setIsOrganizer(userData.role === 'organizer');
+        setIsOrganizer(userData.role === 'organizer' || userData.role === 'admin');
       } catch (error) {
         console.error('Error parsing user data:', error);
+        setIsOrganizer(false);
       }
+    } else {
+      setIsLoggedIn(false);
+      setIsOrganizer(false);
     }
+  };
+
+  useEffect(() => {
+    updateHeroState();
+    
+    window.addEventListener('auth-change', updateHeroState);
+    return () => {
+      window.removeEventListener('auth-change', updateHeroState);
+    };
   }, []);
 
   return (
@@ -39,22 +51,24 @@ export default function Hero() {
               </p>
             </div>
             
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-4 items-center">
               <Link href="/events">
-                 <Button size="lg" className="h-12 px-8 text-base bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white border-0 shadow-lg shadow-orange-500/25">
+                 <Button size="lg" className="h-12 px-8 text-base bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white border-0 shadow-lg shadow-orange-500/25 font-semibold rounded-lg">
                   Explore Events
                 </Button>
               </Link>
               
               {isOrganizer && (
-                <div className="mt-0">
-                  <CreateEventModal />
-                </div>
+                <CreateEventModal 
+                  buttonVariant="outline"
+                  buttonSize="lg"
+                  triggerClassName="h-12 px-8 text-base font-semibold border-2 border-orange-500 text-orange-600 hover:bg-orange-50 dark:border-orange-400 dark:text-orange-400 dark:hover:bg-slate-800 shadow-md shadow-orange-500/5 cursor-pointer rounded-lg"
+                />
               )}
               
               {!isLoggedIn && (
                 <Link href="/register">
-                  <Button variant="outline" size="lg" className="h-12 px-6 text-base">
+                  <Button variant="outline" size="lg" className="h-12 px-6 text-base font-semibold rounded-lg">
                     Get Started
                   </Button>
                 </Link>

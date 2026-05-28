@@ -8,7 +8,8 @@ const EventSchema = new mongoose.Schema({
     category: { type: String, enum: ['Academic', 'Tech and Innovation', 'Cultural & Entertainment', 'Festival', 'Sports'], required: true },
     registrationLink: { type: String },
     organizer: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    image: { type: String }
+    image: { type: String },
+    duration: { type: String, required: true }
 });
 
 module.exports = mongoose.model("Event", EventSchema);

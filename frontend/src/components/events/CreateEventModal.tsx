@@ -9,11 +9,18 @@ import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
-export default function CreateEventModal() {
+interface CreateEventModalProps {
+  triggerClassName?: string;
+  buttonVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  buttonSize?: "default" | "sm" | "lg" | "icon";
+}
+
+export default function CreateEventModal({ triggerClassName, buttonVariant = "default", buttonSize = "default" }: CreateEventModalProps) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
+  const [duration, setDuration] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [location, setLocation] = useState('');
@@ -25,7 +32,7 @@ export default function CreateEventModal() {
   const router = useRouter();
 
   useEffect(() => {
-    // Check if user is logged in and is an organizer
+    // Check if user is logged in and is an organizer or admin
     const token = localStorage.getItem('token');
     const user = localStorage.getItem('user');
     
@@ -36,7 +43,7 @@ export default function CreateEventModal() {
 
     try {
       const userData = JSON.parse(user);
-      setIsOrganizer(userData.role === 'organizer');
+      setIsOrganizer(userData.role === 'organizer' || userData.role === 'admin');
     } catch (error) {
       console.error('Error parsing user data:', error);
       setIsOrganizer(false);
@@ -61,6 +68,17 @@ export default function CreateEventModal() {
       return;
     }
 
+    // Validate duration
+    if (!duration) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Please specify event duration',
+      });
+      setIsLoading(false);
+      return;
+    }
+
     // Create FormData for multipart/form-data request
     const formData = new FormData();
     formData.append('title', title);
@@ -68,6 +86,7 @@ export default function CreateEventModal() {
     formData.append('description', description);
     formData.append('date', eventDateTime.toISOString());
     formData.append('location', location);
+    formData.append('duration', duration);
     if (registrationLink) formData.append('registrationLink', registrationLink);
     if (eventImage) formData.append('eventImage', eventImage);
 
@@ -127,6 +146,7 @@ export default function CreateEventModal() {
     setTitle('');
     setCategory('');
     setDescription('');
+    setDuration('');
     setDate('');
     setTime('');
     setLocation('');
@@ -167,10 +187,11 @@ export default function CreateEventModal() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button 
-          variant="default" 
-          className="mb-6"
+          variant={buttonVariant}
+          size={buttonSize}
+          className={triggerClassName || "mb-6"}
           disabled={!isOrganizer}
-          title={!isOrganizer ? "Only organizers can create events" : "Create a new event"}
+          title={!isOrganizer ? "Only approved organizers can create events" : "Create a new event"}
         >
           Create Event
         </Button>
@@ -184,7 +205,7 @@ export default function CreateEventModal() {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Event Title</Label>
+            <Label htmlFor="title">Event Title <span className="text-red-500">*</span></Label>
             <Input
               id="title"
               value={title}
@@ -194,7 +215,7 @@ export default function CreateEventModal() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="category">Event Category</Label>
+            <Label htmlFor="category">Event Category <span className="text-red-500">*</span></Label>
             <select
               id="category"
               value={category}
@@ -211,7 +232,17 @@ export default function CreateEventModal() {
             </select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="duration">Duration <span className="text-red-500">*</span></Label>
+            <Input
+              id="duration"
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
+              placeholder="e.g. 2 hours, Half Day, 3 Days"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="description">Description <span className="text-red-500">*</span></Label>
             <textarea
               id="description"
               value={description}
@@ -223,7 +254,7 @@ export default function CreateEventModal() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="date">Date</Label>
+              <Label htmlFor="date">Date <span className="text-red-500">*</span></Label>
               <Input
                 id="date"
                 type="date"
@@ -233,7 +264,7 @@ export default function CreateEventModal() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="time">Time</Label>
+              <Label htmlFor="time">Time <span className="text-red-500">*</span></Label>
               <Input
                 id="time"
                 type="time"
@@ -244,7 +275,7 @@ export default function CreateEventModal() {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
+            <Label htmlFor="location">Location <span className="text-red-500">*</span></Label>
             <Input
               id="location"
               value={location}

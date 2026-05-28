@@ -33,9 +33,18 @@ exports.auth = async (req, res, next) => {
 
 // Middleware to check if user is an organizer
 exports.isOrganizer = (req, res, next) => {
-    if (req.user && req.user.role === 'organizer') {
+    if (req.user && (req.user.role === 'organizer' || req.user.role === 'admin')) {
         next();
     } else {
-        res.status(403).json({ msg: 'Access denied. Only organizers can perform this action' });
+        res.status(403).json({ msg: 'Access denied. Only approved organizers can perform this action' });
+    }
+};
+
+// Middleware to check if user is an admin
+exports.isAdmin = (req, res, next) => {
+    if (req.user && req.user.role === 'admin') {
+        next();
+    } else {
+        res.status(403).json({ msg: 'Access denied. Admin access only' });
     }
 };

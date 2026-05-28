@@ -12,9 +12,10 @@ interface EventCardProps {
   image: string;
   location: string;
   category: string;
+  duration?: string;
 }
 
-export default function EventCard({ id, title, description, date, image, location, category }: EventCardProps) {
+export default function EventCard({ id, title, description, date, image, location, category, duration }: EventCardProps) {
   const eventDate = new Date(date);
   const formattedDate = eventDate.toLocaleDateString('en-US', {
     month: 'short',
@@ -49,14 +50,14 @@ export default function EventCard({ id, title, description, date, image, locatio
           <h3 className="mb-3 text-xl font-bold text-slate-900 dark:text-slate-50 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{title}</h3>
           <p className="mb-4 line-clamp-2 text-sm text-slate-600 dark:text-slate-400">{description}</p>
           <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-6 text-sm text-slate-700 dark:text-slate-300">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-700 dark:text-slate-300">
               <div className="flex items-center gap-2">
                 <CalendarDays className="h-4 w-4 text-blue-500" />
                 <span className="font-medium">{formattedDate}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-blue-500" />
-                <span className="font-medium">{formattedTime}</span>
+                <span className="font-medium">{formattedTime} {duration && `(${duration})`}</span>
               </div>
             </div>
             <div className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">

@@ -10,9 +10,9 @@ const router = express.Router();
 // Create an event (organizer only)
 router.post("/create", auth, isOrganizer, upload, async (req, res) => {
     try {
-        const { title, description, date, location, registrationLink, category } = req.body;
+        const { title, description, date, location, registrationLink, category, duration } = req.body;
         
-        if (!title || !description || !date || !location || !category) {
+        if (!title || !description || !date || !location || !category || !duration) {
             return res.status(400).json({ msg: "Please provide all required fields" });
         }
 
@@ -31,7 +31,8 @@ router.post("/create", auth, isOrganizer, upload, async (req, res) => {
             registrationLink, 
             category,
             organizer: req.user.id,
-            image: imagePath
+            image: imagePath,
+            duration
         });
 
         const savedEvent = await event.save();
@@ -111,7 +112,7 @@ router.put("/:id", auth, isOrganizer, upload, async (req, res) => {
             return res.status(401).json({ msg: "Not authorized to update this event" });
         }
 
-        const { title, description, date, location, registrationLink, category } = req.body;
+                const { title, description, date, location, registrationLink, category, duration } = req.body;
         
         // Handle image upload
         let imagePath = event.image;
@@ -135,7 +136,8 @@ router.put("/:id", auth, isOrganizer, upload, async (req, res) => {
                 location: location || event.location,
                 registrationLink: registrationLink || event.registrationLink,
                 category: category || event.category,
-                image: imagePath
+                image: imagePath,
+                duration: duration || event.duration
             },
             { new: true }
         ).populate('organizer', 'name email -_id');
@@ -172,7 +174,7 @@ router.delete("/:id", auth, isOrganizer, async (req, res) => {
             }
         }
 
-        await event.remove();
+        await Event.findByIdAndDelete(req.params.id);
         res.json({ msg: "Event removed" });
     } catch (err) {
         console.error(err);

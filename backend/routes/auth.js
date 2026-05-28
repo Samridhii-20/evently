@@ -9,17 +9,49 @@ const router = express.Router();
 // User Registration Route
 router.post("/auth/register", async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password, role, organizingBody, designation } = req.body;
+
+        if (!name || !email || !password) {
+            return res.status(400).json({ msg: "Please fill in all required fields" });
+        }
 
         let user = await User.findOne({ email });
         if (user) return res.status(400).json({ msg: "User already exists" });
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        user = new User({ name, email, password: hashedPassword, role: "attendee" });
+        
+        let assignedRole = 'attendee';
+        let orgBody = undefined;
+        let desig = undefined;
+
+        // Auto Admin Check
+        if (email.toLowerCase() === 'e23cseu0561@bennett.edu.in') {
+            assignedRole = 'admin';
+        } else if (role === 'organizer') {
+            if (!email.toLowerCase().endsWith('@bennett.edu.in')) {
+                return res.status(400).json({ msg: "Organizers must register with a Bennett email (@bennett.edu.in)" });
+            }
+            if (!organizingBody || !designation) {
+                return res.status(400).json({ msg: "Organizing body and designation are required for organizers" });
+            }
+            assignedRole = 'pending_organizer';
+            orgBody = organizingBody;
+            desig = designation;
+        }
+
+        user = new User({ 
+            name, 
+            email: email.toLowerCase(), 
+            password: hashedPassword, 
+            role: assignedRole,
+            organizingBody: orgBody,
+            designation: desig
+        });
         await user.save();
 
-        res.status(201).json({ msg: "User registered successfully" });
+        res.status(201).json({ msg: assignedRole === 'pending_organizer' ? "Registration successful! Pending admin approval." : "User registered successfully" });
     } catch (err) {
+        console.error(err);
         res.status(500).send("Server Error");
     }
 });
@@ -29,11 +61,21 @@ router.post("/auth/login", async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        const user = await User.findOne({ email });
+        if (!email || !password) {
+            return res.status(400).json({ msg: "Please provide all required fields" });
+        }
+
+        const user = await User.findOne({ email: email.toLowerCase() });
         if (!user) return res.status(400).json({ msg: "User not found" });
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ msg: "Invalid credentials" });
+
+        // Auto check / upgrade Master Admin
+        if (user.email.toLowerCase() === 'e23cseu0561@bennett.edu.in' && user.role !== 'admin') {
+            user.role = 'admin';
+            await user.save();
+        }
 
         const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
