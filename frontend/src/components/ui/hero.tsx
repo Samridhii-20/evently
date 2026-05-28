@@ -60,9 +60,9 @@ export default function Hero() {
               
               {isOrganizer && (
                 <CreateEventModal 
-                  buttonVariant="outline"
+                  buttonVariant="secondary"
                   buttonSize="lg"
-                  triggerClassName="h-12 px-8 text-base font-semibold border-2 border-orange-500 text-orange-600 hover:bg-orange-50 dark:border-orange-400 dark:text-orange-400 dark:hover:bg-slate-800 shadow-md shadow-orange-500/5 cursor-pointer rounded-lg"
+                  triggerClassName="h-12 px-8 text-base font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/20 cursor-pointer rounded-lg border-0"
                 />
               )}
               
